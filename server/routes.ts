@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { insertUserSchema, insertShoppingListSchema } from "@shared/schema";
 import { z } from "zod";
 import { prices } from "@shared/schema";
+import { getPersonalizedRecommendations, analyzeShoppingTrends } from "./services/ai";
 
 // Keep track of connected clients
 const clients = new Set<WebSocket>();
@@ -134,6 +135,52 @@ export function registerRoutes(app: Express) {
     const id = parseInt(req.params.id);
     await storage.deleteFavorite(id);
     res.status(204).send();
+  });
+
+  // AI Recommendations
+  app.get("/api/users/:userId/recommendations", async (req, res) => {
+    const userId = parseInt(req.params.userId);
+    try {
+      // Get user data
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get user's shopping history
+      const shoppingLists = await storage.getShoppingListsForUser(userId);
+
+      // Get all available products
+      const products = await storage.getProducts();
+
+      // Generate recommendations
+      const recommendations = await getPersonalizedRecommendations(
+        user.preferences,
+        shoppingLists,
+        products
+      );
+
+      res.json(recommendations);
+    } catch (error) {
+      console.error('Error getting recommendations:', error);
+      res.status(500).json({ message: "Failed to generate recommendations" });
+    }
+  });
+
+  app.get("/api/users/:userId/shopping-analysis", async (req, res) => {
+    const userId = parseInt(req.params.userId);
+    try {
+      // Get user's shopping history
+      const shoppingLists = await storage.getShoppingListsForUser(userId);
+
+      // Analyze shopping trends
+      const analysis = await analyzeShoppingTrends(shoppingLists);
+
+      res.json({ analysis });
+    } catch (error) {
+      console.error('Error analyzing shopping trends:', error);
+      res.status(500).json({ message: "Failed to analyze shopping trends" });
+    }
   });
 
   return httpServer;

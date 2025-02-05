@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import ProductCard from "@/components/products/product-card";
+import RecommendedProducts from "@/components/products/recommended-products";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search } from "lucide-react";
 import type { Product, Price } from "@shared/schema";
@@ -35,6 +36,11 @@ export default function Home() {
           </Button>
         </CardContent>
       </Card>
+
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold">המלצות אישיות</h2>
+        <RecommendedProducts />
+      </section>
 
       <section className="space-y-4">
         <h2 className="text-lg font-semibold">{t('home.deals')}</h2>
