@@ -11,9 +11,17 @@ import ShoppingList from "./pages/shopping-list";
 import Stores from "./pages/stores";
 import Profile from "./pages/profile";
 import { useTranslation } from "react-i18next";
+import { useEffect } from "react";
+import { webSocketService } from "./lib/websocket";
 
 function Router() {
   const { i18n } = useTranslation();
+
+  // Initialize WebSocket connection
+  useEffect(() => {
+    webSocketService.connect();
+    return () => webSocketService.disconnect();
+  }, []);
 
   return (
     <div className={`min-h-screen pb-16 ${i18n.language === 'he' ? 'rtl' : 'ltr'}`}>

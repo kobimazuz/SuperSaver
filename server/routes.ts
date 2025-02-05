@@ -1,11 +1,40 @@
 import { Express } from "express";
 import { createServer } from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { insertUserSchema, insertShoppingListSchema } from "@shared/schema";
 import { z } from "zod";
 
+// Keep track of connected clients
+const clients = new Set<WebSocket>();
+
 export function registerRoutes(app: Express) {
   const httpServer = createServer(app);
+
+  // Initialize WebSocket server
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+
+  wss.on('connection', (ws) => {
+    clients.add(ws);
+
+    ws.on('close', () => {
+      clients.delete(ws);
+    });
+  });
+
+  // Broadcast price updates to all connected clients
+  function broadcastPriceUpdate(productId: number, storeId: number, newPrice: number) {
+    const message = JSON.stringify({
+      type: 'PRICE_UPDATE',
+      data: { productId, storeId, price: newPrice }
+    });
+
+    clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  }
 
   // Products
   app.get("/api/products", async (req, res) => {
