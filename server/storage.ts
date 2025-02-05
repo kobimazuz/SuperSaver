@@ -23,6 +23,7 @@ export interface IStorage {
   getPrice(id: number): Promise<Price | undefined>;
   getPricesForProduct(productId: number): Promise<Price[]>;
   createPrice(price: InsertPrice): Promise<Price>;
+  updatePrice(id: number, newPrice: number): Promise<Price>;
 
   // Stores
   getStore(id: number): Promise<Store | undefined>;
@@ -90,6 +91,15 @@ export class DatabaseStorage implements IStorage {
   async createPrice(price: InsertPrice): Promise<Price> {
     const [newPrice] = await db.insert(prices).values(price).returning();
     return newPrice;
+  }
+
+  async updatePrice(id: number, newPrice: number): Promise<Price> {
+    const [updatedPrice] = await db
+      .update(prices)
+      .set({ price: newPrice })
+      .where(eq(prices.id, id))
+      .returning();
+    return updatedPrice;
   }
 
   // Stores

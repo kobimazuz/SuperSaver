@@ -1,8 +1,11 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import type { Product, Price } from "@shared/schema";
+import { webSocketService } from "@/lib/websocket";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProductCardProps {
   product: Product;
@@ -11,10 +14,37 @@ interface ProductCardProps {
   isFavorite?: boolean;
 }
 
-export default function ProductCard({ product, prices, onFavorite, isFavorite }: ProductCardProps) {
+export default function ProductCard({ product, prices: initialPrices, onFavorite, isFavorite }: ProductCardProps) {
+  const [prices, setPrices] = useState<Price[]>(initialPrices);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Listen for price updates
+    const unsubscribe = webSocketService.onMessage((message) => {
+      if (message.type === 'PRICE_UPDATE' && 
+          message.data.productId === product.id) {
+        setPrices(currentPrices => 
+          currentPrices.map(price => 
+            price.storeId === message.data.storeId
+              ? { ...price, price: message.data.price }
+              : price
+          )
+        );
+
+        // Show a toast notification for price updates
+        toast({
+          title: "מחיר התעדכן",
+          description: `המחיר של ${product.name} התעדכן`,
+        });
+      }
+    });
+
+    return () => unsubscribe();
+  }, [product.id, toast]);
+
   const lowestPrice = Math.min(...prices.map(p => p.price));
   const highestPrice = Math.max(...prices.map(p => p.price));
-  
+
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-4">
@@ -31,7 +61,7 @@ export default function ProductCard({ product, prices, onFavorite, isFavorite }:
             />
           )}
         </div>
-        
+
         <div className="mt-4 flex items-center justify-between">
           <div className="space-y-1">
             <Badge variant="secondary">{product.category}</Badge>
@@ -46,7 +76,7 @@ export default function ProductCard({ product, prices, onFavorite, isFavorite }:
               )}
             </div>
           </div>
-          
+
           {onFavorite && (
             <Button
               variant="ghost"

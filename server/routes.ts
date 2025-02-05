@@ -4,6 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { insertUserSchema, insertShoppingListSchema } from "@shared/schema";
 import { z } from "zod";
+import { prices } from "@shared/schema";
 
 // Keep track of connected clients
 const clients = new Set<WebSocket>();
@@ -56,6 +57,28 @@ export function registerRoutes(app: Express) {
     const prices = await storage.getPricesForProduct(id);
     res.json(prices);
   });
+
+  app.patch("/api/prices/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const newPrice = parseInt(req.body.price);
+
+    try {
+      const price = await storage.getPrice(id);
+      if (!price) {
+        return res.status(404).json({ message: "Price not found" });
+      }
+
+      const updatedPrice = await storage.updatePrice(id, newPrice);
+
+      // Broadcast the price update to all connected clients
+      broadcastPriceUpdate(updatedPrice.productId, updatedPrice.storeId, updatedPrice.price);
+
+      res.json(updatedPrice);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid price data" });
+    }
+  });
+
 
   // Stores
   app.get("/api/stores", async (req, res) => {
