@@ -5,8 +5,11 @@ import ProductCard from "@/components/products/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search } from "lucide-react";
 import type { Product, Price } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 export default function Home() {
+  const { t } = useTranslation();
+
   const { data: products, isLoading: loadingProducts } = useQuery<Product[]>({
     queryKey: ["/api/products"]
   });
@@ -18,9 +21,9 @@ export default function Home() {
   return (
     <div className="container p-4 space-y-6">
       <header className="space-y-2">
-        <h1 className="text-2xl font-bold tracking-tight">SuperSaver</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t('appName')}</h1>
         <p className="text-muted-foreground">
-          Find the best prices in Israeli supermarkets
+          {t('tagline')}
         </p>
       </header>
 
@@ -28,14 +31,14 @@ export default function Home() {
         <CardContent className="p-4">
           <Button className="w-full justify-start" variant="secondary">
             <Search className="mr-2 h-4 w-4" />
-            Search for products...
+            {t('home.searchPlaceholder')}
           </Button>
         </CardContent>
       </Card>
 
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold">Today's Best Deals</h2>
-        
+        <h2 className="text-lg font-semibold">{t('home.deals')}</h2>
+
         {loadingProducts || loadingPrices ? (
           <div className="space-y-4">
             <Skeleton className="h-[140px] w-full" />

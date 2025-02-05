@@ -12,8 +12,10 @@ import {
 } from "@/components/ui/select";
 import { Search } from "lucide-react";
 import type { Product, Price, Store } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 export default function Compare() {
+  const { t } = useTranslation();
   const [selectedProduct, setSelectedProduct] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -36,16 +38,16 @@ export default function Compare() {
   return (
     <div className="container p-4 space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">Compare Prices</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t('compare.title')}</h1>
         <p className="text-muted-foreground mt-2">
-          Find the best deals across stores
+          {t('compare.subtitle')}
         </p>
       </header>
 
       <div className="space-y-4">
         <div className="flex gap-2">
           <Input
-            placeholder="Search products..."
+            placeholder={t('home.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -56,7 +58,7 @@ export default function Compare() {
 
         <Select value={selectedProduct} onValueChange={setSelectedProduct}>
           <SelectTrigger>
-            <SelectValue placeholder="Select a product" />
+            <SelectValue placeholder={t('compare.selectProduct')} />
           </SelectTrigger>
           <SelectContent>
             {filteredProducts?.map(product => (
@@ -69,7 +71,7 @@ export default function Compare() {
 
         {selectedProduct && (
           <div className="space-y-4 mt-6">
-            <h2 className="text-lg font-semibold">Price Comparison</h2>
+            <h2 className="text-lg font-semibold">{t('compare.priceComparison')}</h2>
             {stores?.map(store => {
               const price = prices?.find(p => p.storeId === store.id);
               return (

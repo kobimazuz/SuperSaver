@@ -9,10 +9,13 @@ import Compare from "./pages/compare";
 import ShoppingList from "./pages/shopping-list";
 import Stores from "./pages/stores";
 import Profile from "./pages/profile";
+import { useTranslation } from "react-i18next";
 
 function Router() {
+  const { i18n } = useTranslation();
+
   return (
-    <div className="min-h-screen pb-16">
+    <div className={`min-h-screen pb-16 ${i18n.language === 'he' ? 'rtl' : 'ltr'}`}>
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/compare" component={Compare} />

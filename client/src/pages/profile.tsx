@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,37 +18,40 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import LanguageSwitcher from "@/components/language-switcher";
 
 export default function ProfilePage() {
+  const { t } = useTranslation();
+
   const menuItems = [
     {
       icon: ShoppingBag,
-      label: "Purchase History",
-      description: "View your shopping history and receipts",
+      label: t('profile.menu.history'),
+      description: t('profile.menu.historyDesc'),
     },
     {
       icon: BellRing,
-      label: "Notifications",
-      description: "Manage your notification preferences",
+      label: t('profile.menu.notifications'),
+      description: t('profile.menu.notificationsDesc'),
     },
     {
       icon: CreditCard,
-      label: "Payment Methods",
-      description: "Manage your payment options",
+      label: t('profile.menu.payment'),
+      description: t('profile.menu.paymentDesc'),
     },
     {
       icon: Settings,
-      label: "Settings",
-      description: "App settings and preferences",
+      label: t('profile.menu.settings'),
+      description: t('profile.menu.settingsDesc'),
     },
   ];
 
   return (
     <div className="container p-4 space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">Profile</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t('profile.title')}</h1>
         <p className="text-muted-foreground mt-1">
-          Manage your account and preferences
+          {t('profile.subtitle')}
         </p>
       </header>
 
@@ -89,9 +93,9 @@ export default function ProfilePage() {
         <CardContent className="p-4 space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="dark-mode">Dark Mode</Label>
+              <Label htmlFor="dark-mode">{t('profile.settings.darkMode')}</Label>
               <p className="text-sm text-muted-foreground">
-                Toggle dark mode theme
+                {t('profile.settings.darkModeDesc')}
               </p>
             </div>
             <Switch id="dark-mode" />
@@ -101,9 +105,21 @@ export default function ProfilePage() {
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="price-alerts">Price Alerts</Label>
+              <Label>{t('profile.settings.language')}</Label>
               <p className="text-sm text-muted-foreground">
-                Get notified about price drops
+                {t('profile.settings.languageDesc')}
+              </p>
+            </div>
+            <LanguageSwitcher />
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="price-alerts">{t('profile.settings.priceAlerts')}</Label>
+              <p className="text-sm text-muted-foreground">
+                {t('profile.settings.priceAlertsDesc')}
               </p>
             </div>
             <Switch id="price-alerts" defaultChecked />
@@ -119,7 +135,7 @@ export default function ProfilePage() {
         }}
       >
         <LogOut className="w-4 h-4 mr-2" />
-        Sign Out
+        {t('profile.signOut')}
       </Button>
     </div>
   );
