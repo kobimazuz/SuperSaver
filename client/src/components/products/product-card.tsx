@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Heart } from "lucide-react";
+import { Heart, RefreshCcw } from "lucide-react";
 import type { Product, Price } from "@shared/schema";
 import { webSocketService } from "@/lib/websocket";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 interface ProductCardProps {
   product: Product;
@@ -17,6 +18,7 @@ interface ProductCardProps {
 export default function ProductCard({ product, prices: initialPrices, onFavorite, isFavorite }: ProductCardProps) {
   const [prices, setPrices] = useState<Price[]>(initialPrices);
   const { toast } = useToast();
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     // Listen for price updates
@@ -41,6 +43,29 @@ export default function ProductCard({ product, prices: initialPrices, onFavorite
 
     return () => unsubscribe();
   }, [product.id, toast]);
+
+  // Function to test price update
+  const handleTestUpdate = async () => {
+    if (prices.length === 0) return;
+
+    setIsUpdating(true);
+    try {
+      const priceToUpdate = prices[0];
+      const newPrice = priceToUpdate.price + 100; // Add 1 NIS for testing
+
+      await apiRequest("PATCH", `/api/prices/${priceToUpdate.id}`, {
+        price: newPrice
+      });
+    } catch (error) {
+      toast({
+        title: "שגיאה",
+        description: "לא הצלחנו לעדכן את המחיר",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   const lowestPrice = Math.min(...prices.map(p => p.price));
   const highestPrice = Math.max(...prices.map(p => p.price));
@@ -77,16 +102,28 @@ export default function ProductCard({ product, prices: initialPrices, onFavorite
             </div>
           </div>
 
-          {onFavorite && (
+          <div className="flex gap-2">
+            {onFavorite && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onFavorite}
+                className={isFavorite ? "text-red-500" : "text-muted-foreground"}
+              >
+                <Heart className="h-5 w-5" />
+              </Button>
+            )}
+
+            {/* Test update button */}
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
-              onClick={onFavorite}
-              className={isFavorite ? "text-red-500" : "text-muted-foreground"}
+              onClick={handleTestUpdate}
+              disabled={isUpdating}
             >
-              <Heart className="h-5 w-5" />
+              <RefreshCcw className={`h-4 w-4 ${isUpdating ? 'animate-spin' : ''}`} />
             </Button>
-          )}
+          </div>
         </div>
       </CardContent>
     </Card>
