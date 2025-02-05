@@ -19,9 +19,11 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import LanguageSwitcher from "@/components/language-switcher";
+import { useTheme } from "@/components/theme-provider";
 
 export default function ProfilePage() {
   const { t } = useTranslation();
+  const { theme, setTheme } = useTheme();
 
   const menuItems = [
     {
@@ -98,7 +100,11 @@ export default function ProfilePage() {
                 {t('profile.settings.darkModeDesc')}
               </p>
             </div>
-            <Switch id="dark-mode" />
+            <Switch
+              id="dark-mode"
+              checked={theme === "dark"}
+              onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+            />
           </div>
 
           <Separator />
